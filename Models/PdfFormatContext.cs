@@ -15,6 +15,8 @@ public partial class PdfFormatContext : DbContext
     {
     }
 
+    public virtual DbSet<AnhXa> AnhXas { get; set; }
+
     public virtual DbSet<Cot> Cots { get; set; }
 
     public virtual DbSet<DauCham> DauChams { get; set; }
@@ -35,6 +37,18 @@ public partial class PdfFormatContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AnhXa>(entity =>
+        {
+            entity.HasKey(e => e.IdAnhXa).HasName("PK__AnhXa__1ACD116D7388B642");
+
+            entity.ToTable("AnhXa");
+
+            entity.Property(e => e.TenCot)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.TenThuocTinh).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<Cot>(entity =>
         {
             entity.HasKey(e => e.IdCot).HasName("PK__Cot__0FA7F2935B365E95");
@@ -47,12 +61,12 @@ public partial class PdfFormatContext : DbContext
 
             entity.HasOne(d => d.IdThuocTinhNavigation).WithMany(p => p.Cots)
                 .HasForeignKey(d => d.IdThuocTinh)
-                .HasConstraintName("FK__Cot__IdThuocTinh__4CA06362");
+                .HasConstraintName("FK_Cot_ThuocTinh");
         });
 
         modelBuilder.Entity<DauCham>(entity =>
         {
-            entity.HasKey(e => e.IdThuocTinh).HasName("PK__DauCham__A937557859DAB3FD");
+            entity.HasKey(e => e.IdThuocTinh).HasName("PK__tmp_ms_x__A9375578D2EDDF09");
 
             entity.ToTable("DauCham");
 
@@ -61,7 +75,7 @@ public partial class PdfFormatContext : DbContext
             entity.HasOne(d => d.IdThuocTinhNavigation).WithOne(p => p.DauCham)
                 .HasForeignKey<DauCham>(d => d.IdThuocTinh)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DauCham__IdThuoc__4AB81AF0");
+                .HasConstraintName("FK_DauCham_ThuocTinh");
         });
 
         modelBuilder.Entity<LoaiThuocTinh>(entity =>
@@ -95,27 +109,30 @@ public partial class PdfFormatContext : DbContext
             entity.ToTable("OVuong");
 
             entity.Property(e => e.IdThuocTinh).ValueGeneratedNever();
+            entity.Property(e => e.Rong)
+                .HasMaxLength(50)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.IdThuocTinhNavigation).WithOne(p => p.Ovuong)
                 .HasForeignKey<Ovuong>(d => d.IdThuocTinh)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__OVuong__IdThuocT__4BAC3F29");
+                .HasConstraintName("FK_OVuong_ThuocTinh");
         });
 
         modelBuilder.Entity<ThuocTinh>(entity =>
         {
-            entity.HasKey(e => e.IdThuocTinh).HasName("PK__ThuocTin__A9375578134CE934");
+            entity.HasKey(e => e.IdThuocTinh);
 
             entity.ToTable("ThuocTinh");
 
-            entity.HasIndex(e => e.IdThuocTinh, "UQ__ThuocTin__A9375579E9C3FD35").IsUnique();
+            entity.HasIndex(e => e.IdThuocTinh, "UQ__tmp_ms_x__A937557987785202").IsUnique();
 
             entity.Property(e => e.NoiDung).HasMaxLength(255);
 
             entity.HasOne(d => d.IdLoaiNavigation).WithMany(p => p.ThuocTinhs)
                 .HasForeignKey(d => d.IdLoai)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ThuocTinh__IdLoa__52593CB8");
+                .HasConstraintName("FK__ThuocTinh__IdLoa__7E37BEF6");
         });
 
         modelBuilder.Entity<ThuocTinhMau>(entity =>
@@ -134,7 +151,7 @@ public partial class PdfFormatContext : DbContext
             entity.HasOne(d => d.IdThuocTinhNavigation).WithOne(p => p.ThuocTinhMau)
                 .HasForeignKey<ThuocTinhMau>(d => d.IdThuocTinh)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ThuocTinh__IdThu__5070F446");
+                .HasConstraintName("FK_ThuocTinh_Mau_ThuocTinh");
         });
 
         OnModelCreatingPartial(modelBuilder);

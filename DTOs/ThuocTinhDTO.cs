@@ -30,7 +30,7 @@ namespace CustomPdf_BE.DTOs
     public class Box
     {
         public bool Visible { get; set; }
-        public List<int> DanhSach { get; set; }
+        public List<int> List { get; set; } = new List<int>();
     }
 
     public class Dot
