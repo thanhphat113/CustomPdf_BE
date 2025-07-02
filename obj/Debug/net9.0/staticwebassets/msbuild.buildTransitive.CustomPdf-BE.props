@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../buildMultiTargeting/CustomPdf-BE.props" />
+</Project>
