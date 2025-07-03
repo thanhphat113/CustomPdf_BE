@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using CustomPdf_BE.DTOs;
+using CustomPdf_BE.Models;
 using CustomPdf_BE.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,6 +41,17 @@ namespace CustomPdf_BE.Controllers
             };
 
             return Ok(ApiResponse<dynamic>.SuccessResponse(mapper, "Lấy dữ liệu thành công"));
+        }
+
+        [HttpPut("Save")]
+        public async Task<IActionResult> PutAsync([FromBody] List<ThuocTinhDTO> items)
+        {
+            var mapper = _mapper.Map<List<ThuocTinh>>(items);
+
+            var result = await _tt.UpdateAllElements(mapper);
+
+            if (!result.Success) return BadRequest(ApiResponse<string>.ErrorResponse(result.Message, result.Errors));
+            return Ok(ApiResponse<string>.SuccessResponse(result.Data, result.Message));
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CustomPdf_BE.DTOs;
 using CustomPdf_BE.Models;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace CustomPdf_BE.Services
@@ -11,6 +12,7 @@ namespace CustomPdf_BE.Services
     public interface IThuocTinhService
     {
         Task<dynamic> GetAllByPdfId(int PdfId);
+        Task<dynamic> UpdateAllElements(List<ThuocTinh> items);
     }
     public class ThuocTinhService : IThuocTinhService
     {
@@ -39,6 +41,24 @@ namespace CustomPdf_BE.Services
             catch (System.Exception ex)
             {
                 return ServiceResult<List<ThuocTinhMau>>.Failure(new List<string> { ex.Message });
+            }
+        }
+
+        public async Task<dynamic> UpdateAllElements(List<ThuocTinh> items)
+        {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    await _context.BulkUpdateAsync(items);
+                    await transaction.CommitAsync();
+                    return ServiceResult<string>.SuccessResult("", "Cập nhật thành công");
+                }
+                catch (System.Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return ServiceResult<string>.Failure(new List<string> { ex.Message });
+                }
             }
         }
     }

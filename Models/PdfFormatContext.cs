@@ -125,14 +125,14 @@ public partial class PdfFormatContext : DbContext
 
             entity.ToTable("ThuocTinh");
 
-            entity.HasIndex(e => e.IdThuocTinh, "UQ__tmp_ms_x__A937557987785202").IsUnique();
+            entity.HasIndex(e => e.IdThuocTinh, "UQ__tmp_ms_x__A937557961BA96DC").IsUnique();
 
             entity.Property(e => e.NoiDung).HasMaxLength(255);
 
             entity.HasOne(d => d.IdLoaiNavigation).WithMany(p => p.ThuocTinhs)
                 .HasForeignKey(d => d.IdLoai)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ThuocTinh__IdLoa__7E37BEF6");
+                .HasConstraintName("FK__ThuocTinh__IdLoa__29221CFB");
         });
 
         modelBuilder.Entity<ThuocTinhMau>(entity =>

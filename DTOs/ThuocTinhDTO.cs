@@ -11,16 +11,19 @@ namespace CustomPdf_BE.DTOs
 
         public string? NoiDung { get; set; }
 
-        public int? X { get; set; }
+        public double? X { get; set; }
 
-        public int? Y { get; set; }
+        public double? Y { get; set; }
 
         public int? FontSize { get; set; }
         public bool? Stt { get; set; }
 
         public bool? TrangThai { get; set; }
 
+        public double? Rong { get; set; }
+
         public string TenLoai { get; set; }
+        public int IdLoai { get; set; }
 
         public Box Box { get; set; }
 
