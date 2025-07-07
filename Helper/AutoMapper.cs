@@ -6,47 +6,35 @@ public class MappingProfile : Profile
 {
 	public MappingProfile()
 	{
-		// // Map từ Entity → DTO
 		CreateMap<ThuocTinhMau, ThuocTinhDTO>()
-			 .ConvertUsing((src, dest, context) =>
-		context.Mapper.Map<ThuocTinhDTO>(src.IdThuocTinhNavigation));
+			.ForMember(dest => dest.TenLoai, opt => opt.MapFrom(src => src.IdThuocTinhNavigation.IdLoaiNavigation.TenLoai))
+			.ForMember(dest => dest.IdLoai, opt => opt.MapFrom(src => src.IdThuocTinhNavigation.IdLoai))
+			.ForMember(dest => dest.NoiDung, opt => opt.MapFrom(src => src.IdThuocTinhNavigation.NoiDung))
+			.ForMember(dest => dest.Box, opt => opt.MapFrom(src => src.Ovuong))
+			.ForMember(dest => dest.Dot, opt => opt.MapFrom(src => src.DauCham))
+			.ReverseMap();
+
+
+		CreateMap<DauCham, DauChamDTO>()
+			.ForMember(dest => dest.Visible, opt => opt.MapFrom(src => src.Visible))
+			.ForMember(dest => dest.Width, opt => opt.MapFrom(src => src.Rong ?? 0))
+			.ReverseMap();
+
+		CreateMap<Ovuong, OVuongDTO>()
+			.ForMember(dest => dest.Visible, opt => opt.MapFrom(src => src.Visible))
+			.ForMember(dest => dest.List, opt => opt.MapFrom(src => GetWidthBoxs(src.Rong)));
+
+		CreateMap<OVuongDTO, Ovuong>()
+			.ForMember(dest => dest.Visible, opt => opt.MapFrom(src => src.Visible))
+			.ForMember(dest => dest.Rong, opt => opt.MapFrom(src => string.Join("-", src.List)));
+
 
 		CreateMap<MauPdf, MauPdfDTO>();
-
-		CreateMap<ThuocTinhDTO, ThuocTinh>()
-			.ForMember(dest => dest.Ovuong, opt => opt.MapFrom(src => new Ovuong
-			{
-				Visible = src.Box.Visible,
-				IdThuocTinh = src.IdThuocTinh,
-				Rong = string.Join("-", src.Box.List)
-			}))
-			.ForMember(dest => dest.DauCham, opt => opt.MapFrom(src => new DauCham
-			{
-				Visible = src.Dot.Visible,
-				IdThuocTinh = src.IdThuocTinh,
-				Rong = src.Dot.Width
-			}));
-
-		CreateMap<ThuocTinh, ThuocTinhDTO>()
-			.ForMember(dest => dest.TenLoai, opt => opt.MapFrom(src => src.IdLoaiNavigation.TenLoai))
-			.ForMember(dest => dest.Box, opt => opt.MapFrom(src => new Box
-			{
-				Visible = src.Ovuong.Visible,
-				List = GetWidthBoxs(src.Ovuong.Rong)
-			}))
-			.ForMember(dest => dest.Dot, opt => opt.MapFrom(src => new Dot
-			{
-				Visible = src.DauCham.Visible,
-				Width = src.DauCham.Rong ?? 0
-			}));
-
-		// // Map từ DTO → Entity
-		// CreateMap<UserDto, User>();
 	}
 
 	private List<int> GetWidthBoxs(string? rong)
 	{
-		if (rong == null) return new List<int>();
+		if (rong == null || rong == "") return new List<int>();
 
 		return rong.Split("-").Select(int.Parse).ToList();
 	}

@@ -9,7 +9,9 @@ public partial class Ovuong
 
     public int IdThuocTinh { get; set; }
 
+    public int IdMau { get; set; }
+
     public bool Visible { get; set; }
 
-    public virtual ThuocTinh IdThuocTinhNavigation { get; set; } = null!;
+    public virtual ThuocTinhMau ThuocTinhMau { get; set; } = null!;
 }

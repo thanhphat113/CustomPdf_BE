@@ -23,13 +23,24 @@ namespace CustomPdf_BE.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<string>> GetAsync()
+        public async Task<IActionResult> GetAsync()
         {
             var result = await _pdf.GetAll();
 
             if (!result.Success) return BadRequest(ApiResponse<string>.ErrorResponse(result.Message, result.Errors));
             var mapper = _mapper.Map<List<MauPdfDTO>>(result.Data);
             return Ok(ApiResponse<List<MauPdfDTO>>.SuccessResponse(mapper, result.Message));
+        }
+
+        [HttpPut("save")]
+        public async Task<IActionResult> PutAsync([FromBody] MauPdfDTO item)
+        {
+            var result = await _pdf.UpdatePdfSizeAsync(item);
+
+            if (!result.Success) return BadRequest(ApiResponse<string>.ErrorResponse(result.Message, result.Errors));
+
+            var mapper = _mapper.Map<MauPdfDTO>(result.Data);
+            return Ok(ApiResponse<MauPdfDTO>.SuccessResponse(mapper, result.Message));
         }
     }
 }

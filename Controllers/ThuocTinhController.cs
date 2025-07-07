@@ -46,7 +46,8 @@ namespace CustomPdf_BE.Controllers
         [HttpPut("Save")]
         public async Task<IActionResult> PutAsync([FromBody] List<ThuocTinhDTO> items)
         {
-            var mapper = _mapper.Map<List<ThuocTinh>>(items);
+            var mapper = _mapper.Map<List<ThuocTinhMau>>(items);
+            // return Ok(mapper);
 
             var result = await _tt.UpdateAllElements(mapper);
 

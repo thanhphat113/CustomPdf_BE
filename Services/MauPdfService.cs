@@ -12,6 +12,7 @@ namespace CustomPdf_BE.Services
     {
         Task<dynamic> GetAll();
         Task<dynamic> GetById(int id);
+        Task<dynamic> UpdatePdfSizeAsync(MauPdfDTO item);
     }
     public class MauPdfService : IMauPdfService
     {
@@ -45,6 +46,26 @@ namespace CustomPdf_BE.Services
                 return ServiceResult<MauPdf>.SuccessResult(result, $"Lấy mẫu pdf thành công");
             }
             catch (Exception ex)
+            {
+                return ServiceResult<MauPdf>.Failure(new List<string> { ex.Message });
+            }
+        }
+
+        public async Task<dynamic> UpdatePdfSizeAsync(MauPdfDTO item)
+        {
+            try
+            {
+                var pdf = await _context.MauPdfs.FindAsync(item.IdMau);
+                if (pdf == null) return ServiceResult<MauPdf>.Failure(new List<string> { $"Không tìm thấy mẫu pdf với Id là {item.IdMau}" });
+
+                pdf.Rong = item.Rong;
+                pdf.Dai = item.Dai;
+
+                await _context.SaveChangesAsync();
+
+                return ServiceResult<MauPdf>.SuccessResult(pdf, $"Cập nhật kích thước mẫu PDF thành công");
+            }
+            catch (System.Exception ex)
             {
                 return ServiceResult<MauPdf>.Failure(new List<string> { ex.Message });
             }
