@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using CustomPdf_BE.DTOs;
+using CustomPdf_BE.Helper;
 using CustomPdf_BE.Models;
 using CustomPdf_BE.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +54,18 @@ namespace CustomPdf_BE.Controllers
 
             if (!result.Success) return BadRequest(ApiResponse<string>.ErrorResponse(result.Message, result.Errors));
             return Ok(ApiResponse<string>.SuccessResponse(result.Data, result.Message));
+        }
+
+        [HttpGet("table/{id}")]
+        public async Task<IActionResult> GetTable(int id)
+        {
+            var elements = await _tt.GetTableByPdfId(id);
+
+            if (!elements.Success) return BadRequest(ApiResponse<string>.ErrorResponse(elements.Message, elements.Errors));
+
+            var mapper = _mapper.Map<List<TableDTO>>(elements.Data);
+
+            return Ok(ApiResponse<dynamic>.SuccessResponse(mapper, "Lấy dữ liệu thành công"));
         }
     }
 }

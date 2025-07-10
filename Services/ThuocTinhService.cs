@@ -12,6 +12,7 @@ namespace CustomPdf_BE.Services
     public interface IThuocTinhService
     {
         Task<dynamic> GetAllByPdfId(int PdfId);
+        Task<dynamic> GetTableByPdfId(int PdfId);
         Task<dynamic> UpdateAllElements(List<ThuocTinhMau> items);
     }
     public class ThuocTinhService : IThuocTinhService
@@ -30,6 +31,28 @@ namespace CustomPdf_BE.Services
                                             .Where(tt => tt.IdMau == PdfId)
                                             .Include(tt => tt.IdThuocTinhNavigation)
                                             .ThenInclude(tt => tt.IdLoaiNavigation)
+                                            .Include(tt => tt.Ovuong)
+                                            .Include(tt => tt.DauCham)
+                                            .ToListAsync();
+
+                return ServiceResult<List<ThuocTinhMau>>.SuccessResult(result, "Lấy danh sách thuộc tính dựa trên mẫu pdf thành công");
+            }
+            catch (System.Exception ex)
+            {
+                return ServiceResult<List<ThuocTinhMau>>.Failure(new List<string> { ex.Message });
+            }
+        }
+
+        public async Task<dynamic> GetTableByPdfId(int PdfId)
+        {
+            try
+            {
+                var result = await _context.ThuocTinhMaus
+                                            .Where(tt => tt.IdMau == PdfId)
+                                            .Include(tt => tt.IdThuocTinhNavigation)
+                                            .ThenInclude(tt => tt.IdLoaiNavigation)
+                                            .Include(tt => tt.IdThuocTinhNavigation.Cots)
+                                            .Where(tt => tt.IdThuocTinhNavigation.IdLoai == 1)
                                             .Include(tt => tt.Ovuong)
                                             .Include(tt => tt.DauCham)
                                             .ToListAsync();

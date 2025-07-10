@@ -11,6 +11,8 @@ public partial class ThuocTinh
 
     public int? IdLoai { get; set; }
 
+    public string? TenCotDuLieu { get; set; }
+
     public virtual ICollection<Cot> Cots { get; set; } = new List<Cot>();
 
     public virtual LoaiThuocTinh? IdLoaiNavigation { get; set; }

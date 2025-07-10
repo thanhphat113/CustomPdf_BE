@@ -16,6 +16,7 @@ builder.Services.AddDbContext<PdfFormatContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IMauPdfService, MauPdfService>();
+builder.Services.AddScoped<IExportPdfService, ExportPdfService>();
 builder.Services.AddScoped<IThuocTinhService, ThuocTinhService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 

@@ -14,6 +14,8 @@ public class MappingProfile : Profile
 			.ForMember(dest => dest.Dot, opt => opt.MapFrom(src => src.DauCham))
 			.ReverseMap();
 
+		CreateMap<ThuocTinhMau, TableDTO>()
+			.ForMember(dest => dest.Cots, opt => opt.MapFrom(src => src.IdThuocTinhNavigation.Cots));
 
 		CreateMap<DauCham, DauChamDTO>()
 			.ForMember(dest => dest.Visible, opt => opt.MapFrom(src => src.Visible))
@@ -30,6 +32,7 @@ public class MappingProfile : Profile
 
 
 		CreateMap<MauPdf, MauPdfDTO>();
+		CreateMap<Cot, CotDTO>();
 	}
 
 	private List<int> GetWidthBoxs(string? rong)

@@ -15,8 +15,6 @@ public partial class PdfFormatContext : DbContext
     {
     }
 
-    public virtual DbSet<AnhXaDuLieu> AnhXaDuLieus { get; set; }
-
     public virtual DbSet<Cot> Cots { get; set; }
 
     public virtual DbSet<DauCham> DauChams { get; set; }
@@ -33,26 +31,26 @@ public partial class PdfFormatContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost;Database=PdfFormat;User Id=sa;Password=123456aA@$;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Server=localhost;Database=PdfFormat;User Id=sa;Password=123456aA@$;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AnhXaDuLieu>(entity =>
-        {
-            entity.HasKey(e => e.IdThuocTinh);
-
-            entity.ToTable("AnhXaDuLieu");
-        });
-
         modelBuilder.Entity<Cot>(entity =>
         {
-            entity.HasKey(e => e.IdCot).HasName("PK__Cot__0FA7F2935B365E95");
+            entity.HasKey(e => e.IdCot).HasName("PK__tmp_ms_x__0FA7F29302B02F2C");
 
             entity.ToTable("Cot");
 
-            entity.HasIndex(e => e.IdCot, "UQ__Cot__0FA7F292F237BEFC").IsUnique();
+            entity.HasIndex(e => e.IdCot, "UQ__tmp_ms_x__0FA7F29244F0CB63").IsUnique();
 
             entity.Property(e => e.TenCot).HasMaxLength(255);
+            entity.Property(e => e.TenCotDuLieu)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.IdCotChaNavigation).WithMany(p => p.InverseIdCotChaNavigation)
+                .HasForeignKey(d => d.IdCotCha)
+                .HasConstraintName("FK_Cot_Cot");
 
             entity.HasOne(d => d.IdThuocTinhNavigation).WithMany(p => p.Cots)
                 .HasForeignKey(d => d.IdThuocTinh)
@@ -120,6 +118,9 @@ public partial class PdfFormatContext : DbContext
             entity.HasIndex(e => e.IdThuocTinh, "UQ__tmp_ms_x__A937557961BA96DC").IsUnique();
 
             entity.Property(e => e.NoiDung).HasMaxLength(255);
+            entity.Property(e => e.TenCotDuLieu)
+                .HasMaxLength(50)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.IdLoaiNavigation).WithMany(p => p.ThuocTinhs)
                 .HasForeignKey(d => d.IdLoai)
