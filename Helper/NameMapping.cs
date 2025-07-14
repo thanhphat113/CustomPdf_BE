@@ -25,7 +25,10 @@ namespace CustomPdf_BE.Helper
             { "Lý do vào viện", "LyDoVaoVien" },
             { "Chẩn doán", "ChanDoan" },
             { "Phòng khám", "PhongKham" },
-            { "Số thứ tự", "SoThuTu" }
+            { "Số thứ tự", "SoThuTu" },
+            {"Nội dung", "NoiDung"},
+            {"Đơn vị tính","DonViTinh"},
+            {"Nguồn thanh toán (đồng)","NguonThanhToan"}
         };
     }
 }

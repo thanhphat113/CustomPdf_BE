@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using AutoMapper;
 using CustomPdf_BE.DTOs;
 using CustomPdf_BE.Helper;
+using CustomPdf_BE.Models;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -16,9 +17,12 @@ namespace CustomPdf_BE.Services
     public class ExportPdfService : IExportPdfService
     {
         private static readonly int _extraHeight = 20;
+        private static readonly float _extraHeightForTable = 0;
         private static readonly float _spacingDot = 5;
         private static readonly float _spacingDotY = 5;
+        private static readonly float _heightCell = 25f;
         private static readonly float _spacingElementAndValue = 10;
+        private static readonly float _paddingLabelInCell = 5;
         private readonly IThuocTinhService _tt;
         private readonly IMauPdfService _pdf;
         private readonly IMapper _mapper;
@@ -38,10 +42,30 @@ namespace CustomPdf_BE.Services
             var height = mauPdf.Dai;
 
             var responseElements = await _tt.GetAllByPdfId(1);
+            var responseTables = await _tt.GetTablesByPdfId(1);
+
+            var tables = _mapper.Map<List<TableDTO>>(responseTables.Data);
             var elements = _mapper.Map<List<ThuocTinhDTO>>(responseElements.Data);
             var formatToDraw = DataConverter.FormatToDrawPdf(elements);
 
+
+            // Data demo
             var data = new Demo { HoTen = "Nguyễn Văn A", NgaySinh = "1990-01-01", GioiTinh = "Nam", DienThoai = "0912345678", DiaChi = "Hà Nội", BHYT = "DN123456789", DKBD = "01", HanSD = "2026-12-31", Mach = "78", NhietDo = "36.5", HuyetAp = "120/80", CanNang = "65", TrieuChung = "Sốt nhẹ", LyDoVaoVien = "Khám sức khỏe", ChanDoan = "Cảm cúm", PhongKham = "PK1", SoThuTu = 1 };
+
+            var tableDemoList = new List<TableDemo>
+            {
+                new TableDemo { NoiDung = "Dịch vụ A", DonViTinh = "Lần", NguonThanhToan = "Bảo hiểm" },
+                new TableDemo { NoiDung = "Dịch vụ B", DonViTinh = "Lần", NguonThanhToan = "Tự chi trả" },
+                new TableDemo { NoiDung = "Xét nghiệm máu", DonViTinh = "Lượt", NguonThanhToan = "Bảo hiểm" },
+                new TableDemo { NoiDung = "Chụp X-Quang", DonViTinh = "Lượt", NguonThanhToan = "Bảo hiểm" },
+                new TableDemo { NoiDung = "Siêu âm", DonViTinh = "Lần", NguonThanhToan = "Tự chi trả" },
+                new TableDemo { NoiDung = "Khám tổng quát", DonViTinh = "Lần", NguonThanhToan = "Bảo hiểm" },
+                new TableDemo { NoiDung = "Đo điện tim", DonViTinh = "Lần", NguonThanhToan = "Tự chi trả" },
+                new TableDemo { NoiDung = "Chụp MRI", DonViTinh = "Lượt", NguonThanhToan = "Bảo hiểm" },
+                new TableDemo { NoiDung = "Nội soi", DonViTinh = "Lần", NguonThanhToan = "Tự chi trả" },
+                new TableDemo { NoiDung = "Tiêm vaccine", DonViTinh = "Mũi", NguonThanhToan = "Bảo hiểm" }
+            };
+
 
             var bytes = Document.Create(container =>
             {
@@ -58,18 +82,30 @@ namespace CustomPdf_BE.Services
 
                     page.Content().Column(col =>
                     {
-                        col.Item().Height(UnitConverter.PxToPoints(maxY)).Canvas((canvas, size) =>
+                        col.Item().Canvas((canvas, size) =>
                         {
                             var borderPaint = new SKPaint
                             {
-                                Style = SKPaintStyle.Stroke, // viền
+                                Style = SKPaintStyle.Stroke,
                                 StrokeWidth = 1,
                                 Color = SKColors.Black,
                                 IsAntialias = true
                             };
 
-                            // Vẽ viền xung quanh toàn bộ vùng canvas được cấp
-                            canvas.DrawRect(0, 0, size.Width, size.Height, borderPaint);
+                            foreach (var item in tables)
+                            {
+                                float currentY;
+
+                                // Vẽ header
+                                var columnPositions = DrawHeader(canvas, item.Cots, borderPaint, out currentY);
+
+                                // Vẽ data
+                                foreach (var row in tableDemoList)
+                                {
+                                    DrawRow(canvas, row, columnPositions, ref currentY, borderPaint);
+                                }
+                            }
+
                             foreach (var list in formatToDraw)
                             {
                                 int length = list.Count;
@@ -83,7 +119,6 @@ namespace CustomPdf_BE.Services
 
                                     var paintForElement = GetPaintForText(item.Mau, item.FontSize, item.InDam, item.Nghieng);
                                     var paintForValue = GetPaintForText(item.MauGiaTri, item.FontSizeGiaTri, item.InDamGiaTri, item.InNghiengGiaTri);
-
 
                                     if (NameMapping.name.TryGetValue(noiDung, out string propertyName))
                                     {
@@ -175,5 +210,85 @@ namespace CustomPdf_BE.Services
             }
         }
 
+        private static float DrawLabelCell(SKCanvas canvas, float x, float y, float width, float height, string label, SKPaint paintBorder, bool isHeader = false, string align = "center")
+        {
+            var backgroundPaint = new SKPaint
+            {
+                Color = SKColor.Parse("#f8f8f8"),
+                Style = SKPaintStyle.Fill
+            };
+
+            var paintLabel = GetPaintForText("#000000", 13, isHeader ? true : false);
+
+
+            if (isHeader) canvas.DrawRect(x, y, width, height, backgroundPaint);
+            canvas.DrawRect(x, y, width, height, paintBorder);
+
+
+            var metrics = paintLabel.FontMetrics;
+            var textHeight = metrics.Descent - metrics.Ascent;
+
+            var yText = y + (height - textHeight) / 2 - metrics.Ascent;
+            var xText = x + _paddingLabelInCell;
+
+            switch (align)
+            {
+                case "center":
+                    var halfWidth = width / 2;
+                    var halfText = paintLabel.MeasureText(label) / 2;
+                    xText = x + halfWidth - halfText;
+                    break;
+                case "right":
+                    var textWidth = paintLabel.MeasureText(label);
+                    xText = x + width - textWidth - _paddingLabelInCell;
+                    break;
+                default:
+                    break;
+            }
+
+            canvas.DrawText(label, xText, yText, paintLabel);
+
+            return y + height;
+        }
+
+        private static Dictionary<string, (float x, float width)> DrawHeader(SKCanvas canvas, List<CotDTO> columns, SKPaint borderPaint, out float headerHeight)
+        {
+            headerHeight = 0;
+            var columnPositions = new Dictionary<string, (float x, float width)>();
+
+            // Vẽ header
+            foreach (var col in columns)
+            {
+                float y = UnitConverter.PxToPoints(col.Y ?? 0f) + _extraHeightForTable;
+                float x = UnitConverter.PxToPoints(col.X ?? 0f);
+                float rong = UnitConverter.PxToPoints(col.Rong ?? 0f);
+                var heightCell = DrawLabelCell(canvas, x, y, rong, _heightCell, col.TenCot, borderPaint, true);
+                if (heightCell > headerHeight) headerHeight = heightCell;
+                columnPositions[col.TenCot] = (x, rong);
+            }
+
+            return columnPositions;
+        }
+
+        private void DrawRow(SKCanvas canvas, TableDemo item, Dictionary<string, (float x, float width)> columnPositions, ref float currentY, SKPaint borderPaint)
+        {
+            foreach (var key in columnPositions.Keys)
+            {
+                string value = "";
+                var (x, width) = columnPositions[key];
+                if (NameMapping.name.TryGetValue(key, out string propertyName))
+                {
+                    var prop = item.GetType().GetProperty(propertyName);
+                    if (prop != null)
+                    {
+                        value = prop.GetValue(item)?.ToString();
+                    }
+                }
+
+                DrawLabelCell(canvas, x, currentY, width, _heightCell, value, borderPaint);
+            }
+
+            currentY += _heightCell;
+        }
     }
 }

@@ -13,6 +13,8 @@ public partial class Cot
 
     public double? Y { get; set; }
 
+    public double? Rong { get; set; }
+
     public int? IdThuocTinh { get; set; }
 
     public string? TenCotDuLieu { get; set; }

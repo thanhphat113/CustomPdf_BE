@@ -37,11 +37,11 @@ public partial class PdfFormatContext : DbContext
     {
         modelBuilder.Entity<Cot>(entity =>
         {
-            entity.HasKey(e => e.IdCot).HasName("PK__tmp_ms_x__0FA7F29302B02F2C");
+            entity.HasKey(e => e.IdCot).HasName("PK__tmp_ms_x__0FA7F293CE790749");
 
             entity.ToTable("Cot");
 
-            entity.HasIndex(e => e.IdCot, "UQ__tmp_ms_x__0FA7F29244F0CB63").IsUnique();
+            entity.HasIndex(e => e.IdCot, "UQ__tmp_ms_x__0FA7F292B93920EF").IsUnique();
 
             entity.Property(e => e.TenCot).HasMaxLength(255);
             entity.Property(e => e.TenCotDuLieu)

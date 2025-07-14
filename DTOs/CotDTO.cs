@@ -12,6 +12,7 @@ namespace CustomPdf_BE.DTOs
         public string? TenCot { get; set; }
 
         public double? X { get; set; }
+        public double? Rong { get; set; }
 
         public double? Y { get; set; }
 

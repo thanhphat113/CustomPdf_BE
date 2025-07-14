@@ -12,7 +12,7 @@ namespace CustomPdf_BE.Services
     public interface IThuocTinhService
     {
         Task<dynamic> GetAllByPdfId(int PdfId);
-        Task<dynamic> GetTableByPdfId(int PdfId);
+        Task<dynamic> GetTablesByPdfId(int PdfId);
         Task<dynamic> UpdateAllElements(List<ThuocTinhMau> items);
     }
     public class ThuocTinhService : IThuocTinhService
@@ -31,6 +31,7 @@ namespace CustomPdf_BE.Services
                                             .Where(tt => tt.IdMau == PdfId)
                                             .Include(tt => tt.IdThuocTinhNavigation)
                                             .ThenInclude(tt => tt.IdLoaiNavigation)
+                                            .Where(tt => tt.IdThuocTinhNavigation.IdLoai != 1)
                                             .Include(tt => tt.Ovuong)
                                             .Include(tt => tt.DauCham)
                                             .ToListAsync();
@@ -43,7 +44,7 @@ namespace CustomPdf_BE.Services
             }
         }
 
-        public async Task<dynamic> GetTableByPdfId(int PdfId)
+        public async Task<dynamic> GetTablesByPdfId(int PdfId)
         {
             try
             {
@@ -51,10 +52,8 @@ namespace CustomPdf_BE.Services
                                             .Where(tt => tt.IdMau == PdfId)
                                             .Include(tt => tt.IdThuocTinhNavigation)
                                             .ThenInclude(tt => tt.IdLoaiNavigation)
-                                            .Include(tt => tt.IdThuocTinhNavigation.Cots)
                                             .Where(tt => tt.IdThuocTinhNavigation.IdLoai == 1)
-                                            .Include(tt => tt.Ovuong)
-                                            .Include(tt => tt.DauCham)
+                                            .Include(tt => tt.IdThuocTinhNavigation.Cots)
                                             .ToListAsync();
 
                 return ServiceResult<List<ThuocTinhMau>>.SuccessResult(result, "Lấy danh sách thuộc tính dựa trên mẫu pdf thành công");
@@ -72,6 +71,11 @@ namespace CustomPdf_BE.Services
                 try
                 {
                     await _context.BulkUpdateAsync(items);
+
+                    var listTable = items.Select(e => e.IdThuocTinhNavigation).Where(e => e.Cots.Any()).SelectMany(e => e.Cots).ToList();
+
+                    if (listTable.Any())
+                        await _context.BulkUpdateAsync(listTable);
 
                     var listOvuong = items.Select(i => i.Ovuong).Where(x => x != null).ToList();
                     var listDauCham = items.Select(i => i.DauCham).Where(x => x != null).ToList();
